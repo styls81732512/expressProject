@@ -15,7 +15,7 @@ export class BaseController {
   }
 
   protected respondCreated(id: number, response: Response) {
-    return response.status(201).send(this.respond(id, "00"));
+    return response.status(201).send(this.respond({ id }, "00"));
   }
 
   protected respondNoContent(response: Response) {
