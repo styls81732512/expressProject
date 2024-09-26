@@ -1,8 +1,8 @@
 import { UserDao } from "../dao/user.dao";
-import {
-  CreateUserRequest,
-  UpdateUserRequest,
-} from "../interfaces/user-request.interface";
+import { CreateUserDto } from "../dto/user/create-user.dto";
+import { FindAllUserDto } from "../dto/user/find-all-user.dto";
+import { UpdateUserDto } from "../dto/user/update-user.dto";
+import { PaginationRo } from "../response-objects/pagination.ro";
 
 export class UserService {
   private userDao: UserDao;
@@ -10,19 +10,26 @@ export class UserService {
     this.userDao = new UserDao();
   }
 
-  async findAll() {
-    return await this.userDao.findAll();
+  async findAll(query: FindAllUserDto) {
+    const [users, total] = await this.userDao.findAll(query);
+
+    return new PaginationRo({
+      total: total,
+      limit: query.limit,
+      current: query.page,
+      data: users,
+    });
   }
 
   async findOne(id: string) {
     return await this.userDao.findOne(id);
   }
 
-  async create(body: CreateUserRequest) {
+  async create(body: CreateUserDto) {
     return await this.userDao.create(body);
   }
 
-  async update(id: string, body: UpdateUserRequest) {
+  async update(id: string, body: UpdateUserDto) {
     return await this.userDao.update(id, body);
   }
 
