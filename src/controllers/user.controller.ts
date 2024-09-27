@@ -1,11 +1,26 @@
-import { Request, Response } from "express";
 import { BaseController } from "../core/controllers/base.controller";
 import { UserService } from "../services/user.service";
 import {
-  CreateUserRequest,
-  UpdateUserRequest,
-} from "../interfaces/user-request.interface";
+  Body,
+  Delete,
+  Get,
+  Path,
+  Post,
+  Put,
+  Queries,
+  Res,
+  Route,
+  Tags,
+  TsoaResponse,
+} from "tsoa";
+import { User } from "../entities/user.entity";
+import { FindAllUserDto } from "../dto/user/find-all-user.dto";
+import { PaginationRo } from "../response-objects/pagination.ro";
+import { UpdateUserDto } from "../dto/user/update-user.dto";
+import { CreateUserDto } from "../dto/user/create-user.dto";
 
+@Route("user")
+@Tags("User")
 export class UserController extends BaseController {
   private userService: UserService;
   constructor() {
@@ -13,33 +28,48 @@ export class UserController extends BaseController {
     this.userService = new UserService();
   }
 
-  async findAll(req: Request, res: Response) {
-    const users = await this.userService.findAll();
+  @Get("/list")
+  async findAll(
+    @Queries() dto: FindAllUserDto,
+    @Res() response: TsoaResponse<200, PaginationRo<User[]>>
+  ) {
+    const users = await this.userService.findAll(dto);
 
-    return this.respondOk(users, res);
+    return this.respondOk(users, response);
   }
 
-  async findOne(req: Request, res: Response) {
-    const user = await this.userService.findOne(req.params.id);
+  @Get("/:id")
+  async findOne(@Path() id: string, @Res() response: TsoaResponse<200, User>) {
+    const user = await this.userService.findOne(id);
 
-    return this.respondOk(user, res);
+    return this.respondOk(user, response);
   }
 
-  async create(req: Request, res: Response) {
-    const user = await this.userService.create(req.body as CreateUserRequest);
+  @Post("")
+  async create(
+    @Body() dto: CreateUserDto,
+    @Res() response: TsoaResponse<201, { id: number }>
+  ) {
+    const user = await this.userService.create(dto);
 
-    return this.respondCreated(user.id, res);
+    return this.respondCreated(user.id, response);
   }
 
-  async update(req: Request, res: Response) {
-    await this.userService.update(req.params.id, req.body as UpdateUserRequest);
+  @Put("/:id")
+  async update(
+    @Path() id: string,
+    @Body() dto: UpdateUserDto,
+    @Res() response: TsoaResponse<200, null>
+  ) {
+    await this.userService.update(id, dto);
 
-    return this.respondNoContent(res);
+    return this.respondNoContent(response);
   }
 
-  async delete(req: Request, res: Response) {
-    await this.userService.delete(req.params.id);
+  @Delete("/:id")
+  async delete(@Path() id: string, @Res() response: TsoaResponse<200, null>) {
+    await this.userService.delete(id);
 
-    return this.respondNoContent(res);
+    return this.respondNoContent(response);
   }
 }
